@@ -113,13 +113,18 @@ document.addEventListener('DOMContentLoaded', () => {
         currentData = data;
         renderTable();
       } else {
-        // If DB is completely empty, initialize with default data
-        currentData = [...defaultQAData];
+        // If DB is completely empty, migrate from localStorage if it exists
+        const savedData = localStorage.getItem('rfi_qa_data_v3');
+        if (savedData) {
+          currentData = JSON.parse(savedData);
+        } else {
+          currentData = [...defaultQAData];
+        }
         saveData();
       }
     }, (error) => {
       console.error("Lỗi đọc dữ liệu Firebase:", error);
-      alert("Không thể đọc dữ liệu đồng bộ. Vui lòng kiểm tra kết nối mạng hoặc cấu hình Firebase.");
+      alert("Lỗi đọc dữ liệu: " + error.message + " - Bạn vui lòng kiểm tra lại 'databaseURL' và 'Security Rules' trong Firebase nhé.");
     });
   };
 
