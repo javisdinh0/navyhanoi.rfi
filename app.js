@@ -8,85 +8,41 @@ document.addEventListener('DOMContentLoaded', () => {
   const tableBody = document.getElementById('qa-table-body');
   const addRowBtn = document.getElementById('add-row-btn');
 
-  // Initial Mock Data
+  // Initial Mock Data matching new form
   const defaultQAData = [
     {
       id: 1,
-      question: "What is the purpose of the AMC - NAVY Hanoi RFI?",
-      answer: "The Request for Information (RFI) is intended to gather preliminary information regarding potential vendors capable of fulfilling the Navy's technological requirements in the Hanoi region.",
-      images: []
-    },
-    {
-      id: 2,
-      question: "What are the specific operational requirements for the naval systems?",
-      answer: "The systems must be highly resilient, capable of operating in diverse marine environments, and support advanced communication protocols.",
-      images: [
-        { src: "assets/mock_image_navy.png", alt: "Naval System Concept" }
-      ]
-    },
-    {
-      id: 3,
-      question: "Are there any infrastructure requirements in Hanoi?",
-      answer: "Yes, the vendor must have or establish a local presence in Hanoi to support maintenance and operational logistics.",
-      images: [
-        { src: "assets/mock_image_hanoi.png", alt: "Hanoi Infrastructure" }
-      ]
+      stt: "1",
+      banVe: "MẶT BẰNG ĐỊNH VỊ BULONG CHỜ CỘT\n(File đính kèm trang 17)",
+      yeuCauNoiDung: "Bản vẽ chi tiết chân cột và chi tiết liên kết chưa có chỉ định chiều dày bản mã đế cột, gân.",
+      yeuCauHinhAnh: [],
+      traLoiNoiDung: "Chiều dày bản mã dày 25mm, chiều dày gân tăng cứng dày 10mm",
+      traLoiHinhAnh: [],
+      ghiChu: "",
+      
+      trangThai: "Pending",
+      ngayGhiNhan: "12/05/2026",
+      yeuCauNote: "Đề nghị bổ sung thông tin",
+      traLoiNote: ""
     }
   ];
 
   let currentData = [];
 
-  const loadData = async () => {
-    const savedData = localStorage.getItem('rfi_qa_data');
+  const loadData = () => {
+    const savedData = localStorage.getItem('rfi_qa_data_v2');
     if (savedData) {
       currentData = JSON.parse(savedData);
       renderTable();
     } else {
-      // Auto-fetch Excel file
-      try {
-        const response = await fetch('./AMC - NAVY Hanoi RFI.xlsx');
-        if (!response.ok) throw new Error('File not found');
-        const arrayBuffer = await response.arrayBuffer();
-        
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        
-        let newItems = [];
-        let startingId = 1;
-
-        jsonData.forEach((row, index) => {
-          if (!row || row.length === 0 || (!row[0] && !row[1])) return;
-          let questionText = row[0] ? String(row[0]).trim() : '';
-          let answerText = row[1] ? String(row[1]).trim() : '';
-          
-          if (index === 0 && questionText.toLowerCase().includes('question')) return; 
-
-          newItems.push({
-            id: startingId++,
-            question: questionText,
-            answer: answerText,
-            images: []
-          });
-        });
-
-        if (newItems.length > 0) {
-          currentData = newItems;
-        } else {
-          currentData = [...defaultQAData];
-        }
-      } catch (error) {
-        console.warn('Could not auto-load Excel file (might be CORS on file:///), using defaults.', error);
-        currentData = [...defaultQAData];
-      }
+      currentData = [...defaultQAData];
       saveData();
       renderTable();
     }
   };
 
   const saveData = () => {
-    localStorage.setItem('rfi_qa_data', JSON.stringify(currentData));
+    localStorage.setItem('rfi_qa_data_v2', JSON.stringify(currentData));
   };
 
   // Check login state
@@ -108,32 +64,51 @@ document.addEventListener('DOMContentLoaded', () => {
     tableBody.innerHTML = '';
     
     currentData.forEach((item, index) => {
-      const tr = document.createElement('tr');
-      
-      let imageHtml = '';
-      if (item.images && item.images.length > 0) {
-        imageHtml = `<div class="thumbnail-container">`;
-        item.images.forEach(img => {
-          imageHtml += `
+      // Render Images helper
+      const renderImages = (imagesArray) => {
+        if (!imagesArray || imagesArray.length === 0) return '';
+        let html = `<div class="thumbnail-container">`;
+        imagesArray.forEach(img => {
+          html += `
             <div class="thumbnail-wrapper" onclick="openImage('${img.src}')" title="Click to view full size">
-              <img src="${img.src}" alt="${img.alt}" loading="lazy" />
+              <img src="${img.src}" alt="Image" loading="lazy" />
             </div>
           `;
         });
-        imageHtml += `</div>`;
-      }
-      
-      tr.innerHTML = `
-        <td>${index + 1}</td>
-        <td class="editable-cell" data-field="question" data-id="${item.id}" contenteditable="true">${item.question || ''}</td>
-        <td class="editable-cell" data-field="answer" data-id="${item.id}" contenteditable="true">${item.answer || ''}</td>
-        <td>${imageHtml}</td>
-        <td>
+        html += `</div>`;
+        return html;
+      };
+
+      // Create Row 1
+      const tr1 = document.createElement('tr');
+      tr1.innerHTML = `
+        <td class="editable-cell" style="text-align:center; font-weight:bold;" data-field="stt" data-id="${item.id}" contenteditable="true">${item.stt || ''}</td>
+        <td class="editable-cell" style="text-align:center; font-weight:bold;" data-field="banVe" data-id="${item.id}" contenteditable="true">${(item.banVe || '').replace(/\n/g, '<br>')}</td>
+        <td class="editable-cell" data-field="yeuCauNoiDung" data-id="${item.id}" contenteditable="true">${item.yeuCauNoiDung || ''}</td>
+        <td>${renderImages(item.yeuCauHinhAnh)}</td>
+        <td class="editable-cell" data-field="traLoiNoiDung" data-id="${item.id}" contenteditable="true">${item.traLoiNoiDung || ''}</td>
+        <td>${renderImages(item.traLoiHinhAnh)}</td>
+        <td class="editable-cell" data-field="ghiChu" data-id="${item.id}" contenteditable="true">${item.ghiChu || ''}</td>
+        <td style="text-align:center;">
           <button class="btn-delete" onclick="deleteRow(${item.id})" title="Delete row">X</button>
         </td>
       `;
-      
-      tableBody.appendChild(tr);
+      tableBody.appendChild(tr1);
+
+      // Create Row 2
+      const tr2 = document.createElement('tr');
+      tr2.className = 'border-dotted-top';
+      tr2.innerHTML = `
+        <td class="editable-cell" style="text-align:center; font-weight:bold;" data-field="trangThai" data-id="${item.id}" contenteditable="true">${item.trangThai || ''}</td>
+        <td class="editable-cell" style="text-align:center; font-weight:bold;" data-field="ngayGhiNhan" data-id="${item.id}" contenteditable="true">${item.ngayGhiNhan || ''}</td>
+        <td class="editable-cell bg-orange-light" data-field="yeuCauNote" data-id="${item.id}" contenteditable="true">${item.yeuCauNote || ''}</td>
+        <td></td>
+        <td class="editable-cell bg-orange-light" data-field="traLoiNote" data-id="${item.id}" contenteditable="true">${item.traLoiNote || ''}</td>
+        <td></td>
+        <td></td>
+        <td></td>
+      `;
+      tableBody.appendChild(tr2);
     });
 
     // Attach blur event listeners to save changes
@@ -167,14 +142,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const newId = currentData.length > 0 ? Math.max(...currentData.map(i => i.id)) + 1 : 1;
     currentData.push({
       id: newId,
-      question: "",
-      answer: "",
-      images: []
+      stt: `${newId}`,
+      banVe: "",
+      yeuCauNoiDung: "",
+      yeuCauHinhAnh: [],
+      traLoiNoiDung: "",
+      traLoiHinhAnh: [],
+      ghiChu: "",
+      trangThai: "Pending",
+      ngayGhiNhan: new Date().toLocaleDateString('en-GB'),
+      yeuCauNote: "",
+      traLoiNote: ""
     });
     saveData();
     renderTable();
-    // focus the new row's question cell
-    const cells = document.querySelectorAll(`td[data-id="${newId}"][data-field="question"]`);
+    // focus the new row's banVe cell
+    const cells = document.querySelectorAll(`td[data-id="${newId}"][data-field="banVe"]`);
     if (cells.length > 0) cells[0].focus();
   });
 
