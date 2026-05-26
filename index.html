@@ -6,6 +6,8 @@
   <title>AMC - NAVY Hanoi RFI | Q&A Portal</title>
   <meta name="description" content="Q&A Portal for AMC - NAVY Hanoi RFI documents.">
   <link rel="stylesheet" href="style.css">
+  <!-- SheetJS CDN for parsing Excel files -->
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -38,8 +40,12 @@
     <main class="table-container">
       <div class="qa-header">
         <h2>RFI Questions & Answers Table</h2>
-        <p>Double-click on cells to edit. Click "Add Row" to append a new question.</p>
-        <button id="add-row-btn" class="btn btn-small">Add Row</button>
+        <p>Double-click on cells to edit. Click "Add Row" to append a new question, or import an Excel file.</p>
+        <div style="display: flex; gap: 10px;">
+          <button id="add-row-btn" class="btn btn-small">Add Row</button>
+          <button id="import-excel-btn" class="btn btn-small" style="background: linear-gradient(to right, #10b981, #059669);">Import from Excel</button>
+          <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" style="display: none;">
+        </div>
       </div>
 
       <div class="excel-table-wrapper">
