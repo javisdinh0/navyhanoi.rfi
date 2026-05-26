@@ -276,12 +276,24 @@ tbody tr:hover {
   color: white;
 }
 
-.editor-note {
-  display: block;
-  font-size: 0.75rem;
-  color: #93c5fd;
-  margin-top: 5px;
-  font-style: italic;
+/* Tooltip for editor note (hover) */
+.editable-cell[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+}
+.editable-cell {
+  position: relative;
 }
 
 select.status-select {
@@ -326,20 +338,52 @@ select.status-select option {
 }
 
 .thumbnail-wrapper {
-  position: relative;
   width: 60px;
-  height: 40px;
+  height: 60px;
   border-radius: 4px;
   overflow: hidden;
-  cursor: pointer;
   border: 1px solid var(--surface-border);
+  transition: transform 0.2s, border-color 0.2s;
+  cursor: zoom-in;
+  position: relative;
 }
 
 .thumbnail-wrapper img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+}
+
+.thumbnail-wrapper:hover {
+  transform: scale(1.1);
+  border-color: var(--accent);
+}
+
+.delete-img-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+  cursor: pointer;
+  display: none;
+  font-weight: bold;
+}
+
+.thumbnail-wrapper:hover .delete-img-btn {
+  display: block;
+}
+
+.delete-img-btn:hover {
+  background: red;
+  transform: scale(1.2);
 }
 
 .thumbnail-wrapper:hover img {

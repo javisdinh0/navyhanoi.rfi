@@ -122,13 +122,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     currentData.forEach((item, index) => {
       // Render Images helper
-      const renderImages = (imagesArray) => {
+      const renderImages = (imagesArray, field) => {
         if (!imagesArray || imagesArray.length === 0) return '';
         let html = `<div class="thumbnail-container">`;
-        imagesArray.forEach(img => {
+        imagesArray.forEach((img, idx) => {
           html += `
             <div class="thumbnail-wrapper" onclick="openImage('${img.src}')" title="Click to view full size">
               <img src="${img.src}" alt="Image" loading="lazy" />
+              <button class="delete-img-btn" onclick="event.stopPropagation(); deleteImage(${item.id}, '${field}', ${idx})" title="Xóa ảnh này">X</button>
             </div>
           `;
         });
@@ -136,16 +137,26 @@ document.addEventListener('DOMContentLoaded', () => {
         return html;
       };
 
+      const getTitle = (field) => {
+        return item.editors && item.editors[field] ? `title="(Sửa bởi: ${item.editors[field]})"` : '';
+      };
+
+      // Clean old editor notes from html if any exist (migration from previous version)
+      const cleanNote = (htmlStr) => {
+        if (!htmlStr) return '';
+        return htmlStr.replace(/<span class="editor-note">.*?<\/span>/g, '');
+      };
+
       // Create Row 1
       const tr1 = document.createElement('tr');
       tr1.innerHTML = `
-        <td class="editable-cell" style="text-align:center; font-weight:bold;" data-field="stt" data-id="${item.id}" contenteditable="true">${item.stt || ''}</td>
-        <td class="editable-cell" style="text-align:center; font-weight:bold;" data-field="banVe" data-id="${item.id}" contenteditable="true">${(item.banVe || '').replace(/\n/g, '<br>')}</td>
-        <td class="editable-cell" data-field="yeuCauNoiDung" data-id="${item.id}" contenteditable="true">${item.yeuCauNoiDung || ''}</td>
-        <td class="image-cell" data-field="yeuCauHinhAnh" data-id="${item.id}" tabindex="0">${renderImages(item.yeuCauHinhAnh)}</td>
-        <td class="editable-cell" data-field="traLoiNoiDung" data-id="${item.id}" contenteditable="true">${item.traLoiNoiDung || ''}</td>
-        <td class="image-cell" data-field="traLoiHinhAnh" data-id="${item.id}" tabindex="0">${renderImages(item.traLoiHinhAnh)}</td>
-        <td class="editable-cell" data-field="ghiChu" data-id="${item.id}" contenteditable="true">${item.ghiChu || ''}</td>
+        <td class="editable-cell" ${getTitle('stt')} style="text-align:center; font-weight:bold;" data-field="stt" data-id="${item.id}" contenteditable="true">${cleanNote(item.stt)}</td>
+        <td class="editable-cell" ${getTitle('banVe')} style="text-align:center; font-weight:bold;" data-field="banVe" data-id="${item.id}" contenteditable="true">${cleanNote(item.banVe).replace(/\n/g, '<br>')}</td>
+        <td class="editable-cell" ${getTitle('yeuCauNoiDung')} data-field="yeuCauNoiDung" data-id="${item.id}" contenteditable="true">${cleanNote(item.yeuCauNoiDung)}</td>
+        <td class="image-cell" data-field="yeuCauHinhAnh" data-id="${item.id}" tabindex="0">${renderImages(item.yeuCauHinhAnh, 'yeuCauHinhAnh')}</td>
+        <td class="editable-cell" ${getTitle('traLoiNoiDung')} data-field="traLoiNoiDung" data-id="${item.id}" contenteditable="true">${cleanNote(item.traLoiNoiDung)}</td>
+        <td class="image-cell" data-field="traLoiHinhAnh" data-id="${item.id}" tabindex="0">${renderImages(item.traLoiHinhAnh, 'traLoiHinhAnh')}</td>
+        <td class="editable-cell" ${getTitle('ghiChu')} data-field="ghiChu" data-id="${item.id}" contenteditable="true">${cleanNote(item.ghiChu)}</td>
       `;
       tableBody.appendChild(tr1);
 
@@ -159,10 +170,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <option value="Done" ${item.trangThai === 'Done' ? 'selected' : ''}>Done</option>
           </select>
         </td>
-        <td class="editable-cell" style="text-align:center; font-weight:bold;" data-field="ngayGhiNhan" data-id="${item.id}" contenteditable="true">${item.ngayGhiNhan || ''}</td>
-        <td class="editable-cell bg-orange-light" data-field="yeuCauNote" data-id="${item.id}" contenteditable="true">${item.yeuCauNote || ''}</td>
+        <td class="editable-cell" ${getTitle('ngayGhiNhan')} style="text-align:center; font-weight:bold;" data-field="ngayGhiNhan" data-id="${item.id}" contenteditable="true">${cleanNote(item.ngayGhiNhan)}</td>
+        <td class="editable-cell bg-orange-light" ${getTitle('yeuCauNote')} data-field="yeuCauNote" data-id="${item.id}" contenteditable="true">${cleanNote(item.yeuCauNote)}</td>
         <td></td>
-        <td class="editable-cell bg-orange-light" data-field="traLoiNote" data-id="${item.id}" contenteditable="true">${item.traLoiNote || ''}</td>
+        <td class="editable-cell bg-orange-light" ${getTitle('traLoiNote')} data-field="traLoiNote" data-id="${item.id}" contenteditable="true">${cleanNote(item.traLoiNote)}</td>
         <td></td>
         <td></td>
       `;
@@ -207,20 +218,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const field = cell.getAttribute('data-field');
       const userEmail = localStorage.getItem('rfi_user_email');
       
-      // Remove any existing editor note to avoid stacking
+      // Clean up any old editor notes from previous version
       newHtml = newHtml.replace(/<span class="editor-note">.*?<\/span>/g, '');
-      
-      // Add editor note
-      if (userEmail) {
-        newHtml += `<span class="editor-note">(Sửa bởi: ${userEmail})</span>`;
-      }
       
       const itemIndex = currentData.findIndex(item => item.id === id);
       if (itemIndex > -1) {
         currentData[itemIndex][field] = newHtml;
+        if (userEmail) {
+          if (!currentData[itemIndex].editors) {
+            currentData[itemIndex].editors = {};
+          }
+          currentData[itemIndex].editors[field] = userEmail;
+        }
         saveData();
-        // optionally re-render, but updating the cell directly might be smoother for UI
-        cell.innerHTML = newHtml;
+        renderTable(); // Re-render to update tooltips
       }
     }
   };
@@ -253,6 +264,17 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         reader.readAsDataURL(blob);
         break; // handle one image at a time
+      }
+    }
+  };
+
+  window.deleteImage = (id, field, idx) => {
+    if(confirm('Are you sure you want to delete this image?')) {
+      const itemIndex = currentData.findIndex(item => item.id === id);
+      if (itemIndex > -1 && currentData[itemIndex][field]) {
+        currentData[itemIndex][field].splice(idx, 1);
+        saveData();
+        renderTable();
       }
     }
   };
@@ -299,6 +321,31 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Please enter a valid email address.');
     }
   });
+
+  // PDF Export
+  const downloadPdfBtn = document.getElementById('download-pdf-btn');
+  if (downloadPdfBtn) {
+    downloadPdfBtn.addEventListener('click', () => {
+      const element = document.getElementById('qa-table');
+      const opt = {
+        margin:       0.2,
+        filename:     'RFI_Hanoi_Table.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
+      };
+      
+      // Temporarily expand height to ensure all content is captured
+      element.style.maxHeight = 'none';
+      element.style.overflow = 'visible';
+      
+      html2pdf().set(opt).from(element).save().then(() => {
+        // Restore styles after generation
+        element.style.maxHeight = '';
+        element.style.overflow = '';
+      });
+    });
+  }
 
   // Logout handler
   logoutBtn.addEventListener('click', () => {

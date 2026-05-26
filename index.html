@@ -5,9 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AMC - NAVY Hanoi RFI | Q&A Portal</title>
   <meta name="description" content="Q&A Portal for AMC - NAVY Hanoi RFI documents.">
-  <link rel="stylesheet" href="style.css">
-  <!-- SheetJS CDN for parsing Excel files -->
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- SheetJS for Excel -->
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <!-- html2pdf for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -43,6 +46,7 @@
         <p>Double-click on cells to edit. Click "Add Row" to append a new question.</p>
         <div style="display: flex; gap: 10px;">
           <button id="add-row-btn" class="btn btn-small">Add Row</button>
+          <button id="download-pdf-btn" class="btn btn-small" style="background: linear-gradient(to right, #ef4444, #dc2626);">Download PDF</button>
         </div>
       </div>
 
