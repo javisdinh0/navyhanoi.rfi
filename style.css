@@ -197,19 +197,18 @@ main.table-container {
 }
 
 .excel-table-wrapper {
-  background: var(--surface-color);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--surface-border);
-  border-radius: 12px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   overflow-x: auto;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+  flex: 1;
+  color: black;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  color: var(--text-primary);
+  color: black;
   text-align: left;
 }
 
@@ -221,25 +220,28 @@ th, td {
 
 th {
   font-weight: bold;
-  color: white;
+  color: black;
   position: sticky;
   top: 0;
   z-index: 5;
   text-align: center;
-  border: 1px solid white;
+  border: 1px solid #9ca3af;
+  background-color: #f3f4f6;
 }
 
 .bg-blue {
   background-color: #0070C0 !important;
+  color: white;
 }
 
 .bg-green {
   background-color: #548235 !important;
+  color: white;
 }
 
 .header-hr {
   border: none;
-  border-top: 1px dotted white;
+  border-top: 1px dotted black;
   margin: 5px 0;
 }
 
@@ -252,28 +254,33 @@ th {
   color: black;
 }
 
+tbody tr {
+  background-color: white;
+}
+
 tbody tr:nth-child(4n-1), tbody tr:nth-child(4n) {
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: #f9fafb;
 }
 
 tbody tr:hover {
-  background-color: rgba(56, 189, 248, 0.05);
+  background-color: #f1f5f9;
 }
 
 .editable-cell {
+  position: relative;
   cursor: text;
   transition: background-color 0.2s;
   min-height: 24px;
 }
 
 .editable-cell:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.03);
 }
 
 .editable-cell[contenteditable="true"]:focus, .image-cell:focus {
   outline: 2px solid var(--accent);
-  background-color: rgba(15, 23, 42, 0.9);
-  color: white;
+  background-color: #fffbeb;
+  color: black;
 }
 
 /* Tooltip for editor note (hover) */
@@ -298,8 +305,8 @@ tbody tr:hover {
 
 select.status-select {
   background: transparent;
-  color: inherit;
-  border: 1px solid var(--surface-border);
+  color: black;
+  border: 1px solid #d1d5db;
   padding: 4px;
   border-radius: 4px;
   font-family: inherit;
@@ -308,8 +315,8 @@ select.status-select {
   width: 100%;
 }
 select.status-select option {
-  background: #1e293b;
-  color: white;
+  background: white;
+  color: black;
 }
 
 .image-cell {
@@ -318,11 +325,11 @@ select.status-select option {
   transition: background-color 0.2s;
 }
 .image-cell:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.05);
 }
 .image-cell:empty::before {
   content: "Paste image here";
-  color: rgba(255,255,255,0.3);
+  color: rgba(0,0,0,0.4);
   font-size: 0.8rem;
   font-style: italic;
   display: flex;
