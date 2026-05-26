@@ -7,8 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const userEmailDisplay = document.getElementById('user-email-display');
   const tableBody = document.getElementById('qa-table-body');
   const addRowBtn = document.getElementById('add-row-btn');
-  const importExcelBtn = document.getElementById('import-excel-btn');
-  const excelFileInput = document.getElementById('excel-file-input');
 
   // Initial Mock Data
   const defaultQAData = [
@@ -38,13 +36,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let currentData = [];
 
-  const loadData = () => {
+  const loadData = async () => {
     const savedData = localStorage.getItem('rfi_qa_data');
     if (savedData) {
       currentData = JSON.parse(savedData);
+      renderTable();
     } else {
-      currentData = [...defaultQAData];
+      // Auto-fetch Excel file
+      try {
+        const response = await fetch('./AMC - NAVY Hanoi RFI.xlsx');
+        if (!response.ok) throw new Error('File not found');
+        const arrayBuffer = await response.arrayBuffer();
+        
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        let newItems = [];
+        let startingId = 1;
+
+        jsonData.forEach((row, index) => {
+          if (!row || row.length === 0 || (!row[0] && !row[1])) return;
+          let questionText = row[0] ? String(row[0]).trim() : '';
+          let answerText = row[1] ? String(row[1]).trim() : '';
+          
+          if (index === 0 && questionText.toLowerCase().includes('question')) return; 
+
+          newItems.push({
+            id: startingId++,
+            question: questionText,
+            answer: answerText,
+            images: []
+          });
+        });
+
+        if (newItems.length > 0) {
+          currentData = newItems;
+        } else {
+          currentData = [...defaultQAData];
+        }
+      } catch (error) {
+        console.warn('Could not auto-load Excel file (might be CORS on file:///), using defaults.', error);
+        currentData = [...defaultQAData];
+      }
       saveData();
+      renderTable();
     }
   };
 
@@ -60,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
       appSection.style.display = 'flex';
       userEmailDisplay.textContent = userEmail;
       loadData();
-      renderTable();
     } else {
       authSection.style.display = 'flex';
       appSection.style.display = 'none';
@@ -140,73 +176,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // focus the new row's question cell
     const cells = document.querySelectorAll(`td[data-id="${newId}"][data-field="question"]`);
     if (cells.length > 0) cells[0].focus();
-  });
-
-  // Excel Import Logic
-  importExcelBtn.addEventListener('click', () => {
-    excelFileInput.click();
-  });
-
-  excelFileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      try {
-        const data = evt.target.result;
-        const workbook = XLSX.read(data, { type: 'binary' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        
-        // Convert to Array of Arrays
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        
-        // Parse the data into currentData format
-        // We assume the first row might be headers. We'll add all rows with content.
-        let newItems = [];
-        let startingId = currentData.length > 0 ? Math.max(...currentData.map(i => i.id)) + 1 : 1;
-
-        jsonData.forEach((row, index) => {
-          // Skip empty rows
-          if (!row || row.length === 0 || (!row[0] && !row[1])) return;
-          
-          // Assuming Col 1 (index 0) is Question, Col 2 (index 1) is Answer
-          // Or if there's only 1 col, it's just a question.
-          let questionText = row[0] ? String(row[0]).trim() : '';
-          let answerText = row[1] ? String(row[1]).trim() : '';
-          let imageText = row[2] ? String(row[2]).trim() : ''; // sometimes images are in 3rd col text
-
-          // Basic heuristic to skip header if it says "question"
-          if (index === 0 && questionText.toLowerCase().includes('question') && answerText.toLowerCase().includes('answer')) {
-            return; 
-          }
-
-          newItems.push({
-            id: startingId++,
-            question: questionText,
-            answer: answerText,
-            images: []
-          });
-        });
-
-        if (newItems.length > 0) {
-          currentData = [...currentData, ...newItems];
-          saveData();
-          renderTable();
-          alert(`Successfully imported ${newItems.length} rows from Excel!`);
-        } else {
-          alert('No valid data found in the Excel file.');
-        }
-      } catch (err) {
-        console.error(err);
-        alert('Error parsing Excel file. Please ensure it is a valid .xlsx or .xls file.');
-      }
-      // Reset input so the same file can be selected again if needed
-      excelFileInput.value = "";
-    };
-    
-    reader.readAsBinaryString(file);
   });
 
   // Login handler
