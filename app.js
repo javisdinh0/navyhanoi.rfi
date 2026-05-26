@@ -311,7 +311,27 @@ document.addEventListener('DOMContentLoaded', () => {
   checkAuth();
 });
 
-// Global function to open image in new tab
+// Global function to open image in modal instead of new tab (fixes data: URI block issue)
 window.openImage = function(src) {
-  window.open(src, '_blank');
+  let modal = document.getElementById('image-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'image-modal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.9);display:flex;justify-content:center;align-items:center;z-index:9999;cursor:zoom-out;backdrop-filter:blur(5px);';
+    
+    const img = document.createElement('img');
+    img.id = 'image-modal-img';
+    img.style.cssText = 'max-width:90%;max-height:90%;object-fit:contain;border:2px solid rgba(255,255,255,0.2);border-radius:8px;box-shadow:0 10px 25px rgba(0,0,0,0.5);';
+    modal.appendChild(img);
+    
+    modal.onclick = () => {
+      modal.style.display = 'none';
+    };
+    
+    document.body.appendChild(modal);
+  }
+  
+  const img = document.getElementById('image-modal-img');
+  img.src = src;
+  modal.style.display = 'flex';
 };
