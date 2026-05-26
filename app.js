@@ -142,13 +142,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <td class="editable-cell" style="text-align:center; font-weight:bold;" data-field="stt" data-id="${item.id}" contenteditable="true">${item.stt || ''}</td>
         <td class="editable-cell" style="text-align:center; font-weight:bold;" data-field="banVe" data-id="${item.id}" contenteditable="true">${(item.banVe || '').replace(/\n/g, '<br>')}</td>
         <td class="editable-cell" data-field="yeuCauNoiDung" data-id="${item.id}" contenteditable="true">${item.yeuCauNoiDung || ''}</td>
-        <td>${renderImages(item.yeuCauHinhAnh)}</td>
+        <td class="image-cell" data-field="yeuCauHinhAnh" data-id="${item.id}" tabindex="0">${renderImages(item.yeuCauHinhAnh)}</td>
         <td class="editable-cell" data-field="traLoiNoiDung" data-id="${item.id}" contenteditable="true">${item.traLoiNoiDung || ''}</td>
-        <td>${renderImages(item.traLoiHinhAnh)}</td>
+        <td class="image-cell" data-field="traLoiHinhAnh" data-id="${item.id}" tabindex="0">${renderImages(item.traLoiHinhAnh)}</td>
         <td class="editable-cell" data-field="ghiChu" data-id="${item.id}" contenteditable="true">${item.ghiChu || ''}</td>
-        <td style="text-align:center;">
-          <button class="btn-delete" onclick="deleteRow(${item.id})" title="Delete row">X</button>
-        </td>
       `;
       tableBody.appendChild(tr1);
 
@@ -156,12 +153,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const tr2 = document.createElement('tr');
       tr2.className = 'border-dotted-top';
       tr2.innerHTML = `
-        <td class="editable-cell" style="text-align:center; font-weight:bold;" data-field="trangThai" data-id="${item.id}" contenteditable="true">${item.trangThai || ''}</td>
+        <td style="text-align:center; padding: 4px;">
+          <select class="status-select" data-id="${item.id}">
+            <option value="Pending" ${item.trangThai === 'Pending' ? 'selected' : ''}>Pending</option>
+            <option value="Done" ${item.trangThai === 'Done' ? 'selected' : ''}>Done</option>
+          </select>
+        </td>
         <td class="editable-cell" style="text-align:center; font-weight:bold;" data-field="ngayGhiNhan" data-id="${item.id}" contenteditable="true">${item.ngayGhiNhan || ''}</td>
         <td class="editable-cell bg-orange-light" data-field="yeuCauNote" data-id="${item.id}" contenteditable="true">${item.yeuCauNote || ''}</td>
         <td></td>
         <td class="editable-cell bg-orange-light" data-field="traLoiNote" data-id="${item.id}" contenteditable="true">${item.traLoiNote || ''}</td>
-        <td></td>
         <td></td>
         <td></td>
       `;
@@ -171,19 +172,88 @@ document.addEventListener('DOMContentLoaded', () => {
     // Attach blur event listeners to save changes
     document.querySelectorAll('.editable-cell').forEach(cell => {
       cell.addEventListener('blur', handleCellEdit);
+      // store old value to check if it really changed
+      cell.addEventListener('focus', (e) => {
+        e.target.setAttribute('data-old', e.target.innerHTML);
+      });
+    });
+
+    // Attach change event for status select
+    document.querySelectorAll('.status-select').forEach(select => {
+      select.addEventListener('change', (e) => {
+        const id = parseInt(e.target.getAttribute('data-id'));
+        const itemIndex = currentData.findIndex(item => item.id === id);
+        if (itemIndex > -1) {
+          currentData[itemIndex].trangThai = e.target.value;
+          saveData();
+        }
+      });
+    });
+
+    // Attach paste event for image cells
+    document.querySelectorAll('.image-cell').forEach(cell => {
+      cell.addEventListener('paste', handleImagePaste);
     });
   };
 
   const handleCellEdit = (e) => {
     const cell = e.target;
+    const oldHtml = cell.getAttribute('data-old');
+    let newHtml = cell.innerHTML;
+    
+    // Check if content actually changed
+    if (oldHtml !== newHtml) {
+      const id = parseInt(cell.getAttribute('data-id'));
+      const field = cell.getAttribute('data-field');
+      const userEmail = localStorage.getItem('rfi_user_email');
+      
+      // Remove any existing editor note to avoid stacking
+      newHtml = newHtml.replace(/<span class="editor-note">.*?<\/span>/g, '');
+      
+      // Add editor note
+      if (userEmail) {
+        newHtml += `<span class="editor-note">(Sửa bởi: ${userEmail})</span>`;
+      }
+      
+      const itemIndex = currentData.findIndex(item => item.id === id);
+      if (itemIndex > -1) {
+        currentData[itemIndex][field] = newHtml;
+        saveData();
+        // optionally re-render, but updating the cell directly might be smoother for UI
+        cell.innerHTML = newHtml;
+      }
+    }
+  };
+
+  const handleImagePaste = (e) => {
+    e.preventDefault();
+    const cell = e.currentTarget;
     const id = parseInt(cell.getAttribute('data-id'));
     const field = cell.getAttribute('data-field');
-    const newValue = cell.innerText.trim();
-
-    const itemIndex = currentData.findIndex(item => item.id === id);
-    if (itemIndex > -1) {
-      currentData[itemIndex][field] = newValue;
-      saveData();
+    
+    const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+    for (let index in items) {
+      const item = items[index];
+      if (item.kind === 'file' && item.type.startsWith('image/')) {
+        const blob = item.getAsFile();
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const itemIndex = currentData.findIndex(i => i.id === id);
+          if (itemIndex > -1) {
+            if (!currentData[itemIndex][field]) {
+              currentData[itemIndex][field] = [];
+            }
+            currentData[itemIndex][field].push({
+              src: event.target.result,
+              alt: "Pasted Image"
+            });
+            saveData();
+            renderTable();
+          }
+        };
+        reader.readAsDataURL(blob);
+        break; // handle one image at a time
+      }
     }
   };
 

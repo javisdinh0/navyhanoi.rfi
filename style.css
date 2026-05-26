@@ -270,10 +270,53 @@ tbody tr:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-.editable-cell[contenteditable="true"]:focus {
+.editable-cell[contenteditable="true"]:focus, .image-cell:focus {
   outline: 2px solid var(--accent);
   background-color: rgba(15, 23, 42, 0.9);
   color: white;
+}
+
+.editor-note {
+  display: block;
+  font-size: 0.75rem;
+  color: #93c5fd;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+select.status-select {
+  background: transparent;
+  color: inherit;
+  border: 1px solid var(--surface-border);
+  padding: 4px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+}
+select.status-select option {
+  background: #1e293b;
+  color: white;
+}
+
+.image-cell {
+  cursor: pointer;
+  min-height: 40px;
+  transition: background-color 0.2s;
+}
+.image-cell:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.image-cell:empty::before {
+  content: "Paste image here";
+  color: rgba(255,255,255,0.3);
+  font-size: 0.8rem;
+  font-style: italic;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 
 .thumbnail-container {
