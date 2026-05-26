@@ -1,3 +1,22 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB885dxTZZUiu9lnQ9PsKnCTljfgMRFqoo",
+  authDomain: "navyhanoi.firebaseapp.com",
+  projectId: "navyhanoi",
+  storageBucket: "navyhanoi.firebasestorage.app",
+  messagingSenderId: "53561018696",
+  appId: "1:53561018696:web:0a19f13a102e3b706d0b7d",
+  measurementId: "G-YHFR3CCKPV",
+  // Providing fallback databaseURL in case it isn't inferred automatically
+  databaseURL: "https://navyhanoi-default-rtdb.asia-southeast1.firebasedatabase.app"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const dbRef = ref(db, 'rfi_data_v4');
+
 document.addEventListener('DOMContentLoaded', () => {
   const authSection = document.getElementById('auth-section');
   const appSection = document.getElementById('app-section');
@@ -87,19 +106,29 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentData = [];
 
   const loadData = () => {
-    const savedData = localStorage.getItem('rfi_qa_data_v3');
-    if (savedData) {
-      currentData = JSON.parse(savedData);
-      renderTable();
-    } else {
-      currentData = [...defaultQAData];
-      saveData();
-      renderTable();
-    }
+    // Listen to Firebase Realtime Database
+    onValue(dbRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        currentData = data;
+        renderTable();
+      } else {
+        // If DB is completely empty, initialize with default data
+        currentData = [...defaultQAData];
+        saveData();
+      }
+    }, (error) => {
+      console.error("Lỗi đọc dữ liệu Firebase:", error);
+      alert("Không thể đọc dữ liệu đồng bộ. Vui lòng kiểm tra kết nối mạng hoặc cấu hình Firebase.");
+    });
   };
 
   const saveData = () => {
-    localStorage.setItem('rfi_qa_data_v3', JSON.stringify(currentData));
+    // Write to Firebase Realtime Database
+    set(dbRef, currentData).catch(error => {
+      console.error("Lỗi lưu dữ liệu Firebase:", error);
+      alert("Không thể lưu dữ liệu đồng bộ. Có thể bạn chưa chỉnh 'Security Rules' của Firebase thành true.");
+    });
   };
 
   // Check login state
