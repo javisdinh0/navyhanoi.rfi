@@ -11,26 +11,83 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial Mock Data matching new form
   const defaultQAData = [
     {
-      id: 1,
-      stt: "1",
-      banVe: "MẶT BẰNG ĐỊNH VỊ BULONG CHỜ CỘT\n(File đính kèm trang 17)",
+      id: 1, stt: "1", banVe: "MẶT BẰNG ĐỊNH VỊ BULONG CHỜ CỘT\n(File đính kèm trang 17)",
       yeuCauNoiDung: "Bản vẽ chi tiết chân cột và chi tiết liên kết chưa có chỉ định chiều dày bản mã đế cột, gân.",
-      yeuCauHinhAnh: [],
-      traLoiNoiDung: "Chiều dày bản mã dày 25mm, chiều dày gân tăng cứng dày 10mm",
-      traLoiHinhAnh: [],
-      ghiChu: "",
-      
-      trangThai: "Pending",
-      ngayGhiNhan: "12/05/2026",
-      yeuCauNote: "Đề nghị bổ sung thông tin",
-      traLoiNote: ""
+      yeuCauHinhAnh: [], traLoiNoiDung: "Chiều dày bản mã dày 25mm, chiều dày gân tăng cứng dày 10mm", traLoiHinhAnh: [], ghiChu: "",
+      trangThai: "Pending", ngayGhiNhan: "12/05/2026", yeuCauNote: "Đề nghị bổ sung thông tin", traLoiNote: ""
+    },
+    {
+      id: 2, stt: "2", banVe: "MẶT BẰNG ĐỊNH VỊ BULONG CHỜ CỘT/\nMẶT BẰNG ĐỊNH VỊ CỘT TẦNG 1/\n(File đính kèm trang 17, 18)",
+      yeuCauNoiDung: "Định vị bulong neo cột SC1 trục 4/A khác mặt bằng chân cột.",
+      yeuCauHinhAnh: [], traLoiNoiDung: "Định vị cột điều chỉnh theo bản vẽ phần thân", traLoiHinhAnh: [], ghiChu: "",
+      trangThai: "Pending", ngayGhiNhan: "12/05/2026", yeuCauNote: "Đề nghị bổ sung thông tin", traLoiNote: ""
+    },
+    {
+      id: 3, stt: "3", banVe: "MẶT BẰNG ĐỊNH VỊ BULONG CHỜ CỘT\n(File đính kèm trang 17)",
+      yeuCauNoiDung: "Dim định vị cột không khớp với vị trí cột",
+      yeuCauHinhAnh: [], traLoiNoiDung: "Dim lỗi, Nt xác định vị trí theo bản vẽ, nt điều chỉnh lại dim ở bản vẽ shop", traLoiHinhAnh: [], ghiChu: "",
+      trangThai: "Pending", ngayGhiNhan: "12/05/2026", yeuCauNote: "Đề nghị bổ sung thông tin", traLoiNote: ""
+    },
+    {
+      id: 4, stt: "4", banVe: "MẶT BẰNG ĐỊNH VỊ BULONG CHỜ CỘT\n(File đính kèm trang 17)",
+      yeuCauNoiDung: "Chi tiết chân cột không khớp tiết diện cột",
+      yeuCauHinhAnh: [], traLoiNoiDung: "Vị trí cột đó là sc4\nH450x200 đã khớp bản vẽ, nt điều chỉnh lại dim", traLoiHinhAnh: [], ghiChu: "",
+      trangThai: "Pending", ngayGhiNhan: "12/05/2026", yeuCauNote: "Đề nghị bổ sung thông tin", traLoiNote: ""
+    },
+    {
+      id: 5, stt: "5", banVe: "MẶT BẰNG KẾT CẤU MÁI 1\n(File đính kèm trang 19)",
+      yeuCauNoiDung: "Các dầm dài không có chi tiết nối. Không phù hợp cho gia công/ vận chuyển/ lắp dựng",
+      yeuCauHinhAnh: [], traLoiNoiDung: "Các dầm dài bị ngắt tại nút cột, NT xem chi tiết", traLoiHinhAnh: [], ghiChu: "",
+      trangThai: "Pending", ngayGhiNhan: "12/05/2026", yeuCauNote: "Đề nghị bổ sung chi tiết liên kết nối dầm", traLoiNote: ""
+    },
+    {
+      id: 6, stt: "6", banVe: "",
+      yeuCauNoiDung: "Chưa có mặt cắt khung (qua 3 loại mái)",
+      yeuCauHinhAnh: [], traLoiNoiDung: "NT Xem kết hợp bản vẽ kiến trúc", traLoiHinhAnh: [], ghiChu: "",
+      trangThai: "Pending", ngayGhiNhan: "12/05/2026", yeuCauNote: "Đề nghị cung cấp", traLoiNote: ""
+    },
+    {
+      id: 7, stt: "7", banVe: "",
+      yeuCauNoiDung: "Chi tiết dầm SB1A (trục 4-1400) bị chênh cao độ (do mặt bằng kiến trúc mái không đúng độ dốc)",
+      yeuCauHinhAnh: [], traLoiNoiDung: "Vị trí này là dầm chéo.", traLoiHinhAnh: [], ghiChu: "",
+      trangThai: "Pending", ngayGhiNhan: "12/05/2026", yeuCauNote: "Đề nghị bổ sung mặt cắt vị trí này", traLoiNote: ""
+    },
+    {
+      id: 8, stt: "8", banVe: "CHI TIẾT MẶT CẮT CANOPY\n(File đính kèm trang 24)",
+      yeuCauNoiDung: "Vị trí cột và dầm mặt cắt 1-1 Không khớp với mặt bằng cột tầng 1; mặt bằng cột tầng 2 và dầm mái 1",
+      yeuCauHinhAnh: [], traLoiNoiDung: "THEO BẢN VẼ MB, NT ĐIỀU CHỈNH LẠI MC Ở BẢN VẼ SHOP", traLoiHinhAnh: [], ghiChu: "",
+      trangThai: "Pending", ngayGhiNhan: "12/05/2026", yeuCauNote: "Đề nghị bổ sung thông tin", traLoiNote: ""
+    },
+    {
+      id: 9, stt: "9", banVe: "MẶT BẰNG MÁI A-1002",
+      yeuCauNoiDung: "Mái 1 trục 3-4 không đúng độ dốc mái.",
+      yeuCauHinhAnh: [], traLoiNoiDung: "ĐỀ NGHỊ NT CHỈ RÕ HƠN", traLoiHinhAnh: [], ghiChu: "Bản vẽ kiến trúc sai mặt bằng độ dốc mái; đã điều chỉnh theo kết cấu",
+      trangThai: "Pending", ngayGhiNhan: "13/05/2026", yeuCauNote: "Đề nghị kiểm tra và bổ sung mặt cắt vị trí này", traLoiNote: ""
+    },
+    {
+      id: 10, stt: "10", banVe: "MẶT BẰNG KẾT CẤU MÁI 1\n(File đính kèm trang 19)",
+      yeuCauNoiDung: "Dầm SB4 và SD1 va chạm",
+      yeuCauHinhAnh: [], traLoiNoiDung: "Dầm SB4 có thể hạ xuống 1 chút đảm bảo sd1 đặt lên", traLoiHinhAnh: [], ghiChu: "",
+      trangThai: "Pending", ngayGhiNhan: "13/05/2026", yeuCauNote: "Đề nghị kiểm tra/ điều chỉnh", traLoiNote: ""
+    },
+    {
+      id: 11, stt: "11", banVe: "MẶT BẰNG KẾT CẤU MÁI 2\n((File đính kèm trang 24)",
+      yeuCauNoiDung: "Cao độ dầm và độ dốc dầm không khớp với kiến trúc (Mái hồi không đồng phẳng)",
+      yeuCauHinhAnh: [], traLoiNoiDung: "NT XEM PHẢN HỒI TẠI BẢN VẼ ĐI KÈM, TRANG 24", traLoiHinhAnh: [], ghiChu: "",
+      trangThai: "Pending", ngayGhiNhan: "13/05/2026", yeuCauNote: "Đề nghị kiểm tra/ điều chỉnh", traLoiNote: ""
+    },
+    {
+      id: 12, stt: "12", banVe: "CHI TIẾT LIÊN KẾT 10\n(File đính kèm trang 19)",
+      yeuCauNoiDung: "Liên kết không phù hợp kích thước tổng (3 phương) cấu kiện lớn không phù hợp gia công/ chế tạo/ lắp dựng",
+      yeuCauHinhAnh: [], traLoiNoiDung: "NÚT LIÊN KẾT NÀY HÀN NHÀ MÁY, ĐẨY PHẦN NỐI RA CÁC DẦM XUNG QUANH", traLoiHinhAnh: [], ghiChu: "",
+      trangThai: "Pending", ngayGhiNhan: "13/05/2026", yeuCauNote: "Đề nghị kiểm tra/ điều chỉnh", traLoiNote: ""
     }
   ];
 
   let currentData = [];
 
   const loadData = () => {
-    const savedData = localStorage.getItem('rfi_qa_data_v2');
+    const savedData = localStorage.getItem('rfi_qa_data_v3');
     if (savedData) {
       currentData = JSON.parse(savedData);
       renderTable();
@@ -42,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const saveData = () => {
-    localStorage.setItem('rfi_qa_data_v2', JSON.stringify(currentData));
+    localStorage.setItem('rfi_qa_data_v3', JSON.stringify(currentData));
   };
 
   // Check login state
