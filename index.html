@@ -35,14 +35,28 @@
       </div>
     </header>
 
-    <main>
+    <main class="table-container">
       <div class="qa-header">
-        <h2>RFI Questions & Answers</h2>
-        <p>Review the details and documents below. Click on thumbnails to view full-size images.</p>
+        <h2>RFI Questions & Answers Table</h2>
+        <p>Double-click on cells to edit. Click "Add Row" to append a new question.</p>
+        <button id="add-row-btn" class="btn btn-small">Add Row</button>
       </div>
 
-      <div class="qa-list" id="qa-container">
-        <!-- Q&A Items will be dynamically injected here by app.js -->
+      <div class="excel-table-wrapper">
+        <table id="qa-table">
+          <thead>
+            <tr>
+              <th width="5%">ID</th>
+              <th width="35%">Question</th>
+              <th width="40%">Answer</th>
+              <th width="15%">Images</th>
+              <th width="5%">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="qa-table-body">
+            <!-- Table rows injected by app.js -->
+          </tbody>
+        </table>
       </div>
     </main>
   </section>
