@@ -163,9 +163,10 @@ document.addEventListener('DOMContentLoaded', () => {
       // Create Row 2
       const tr2 = document.createElement('tr');
       tr2.className = 'border-dotted-top';
+      const statusClass = item.trangThai === 'Pending' ? 'status-pending' : 'status-done';
       tr2.innerHTML = `
         <td style="text-align:center; padding: 4px;">
-          <select class="status-select" data-id="${item.id}">
+          <select class="status-select ${statusClass}" data-id="${item.id}">
             <option value="Pending" ${item.trangThai === 'Pending' ? 'selected' : ''}>Pending</option>
             <option value="Done" ${item.trangThai === 'Done' ? 'selected' : ''}>Done</option>
           </select>
@@ -196,6 +197,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const itemIndex = currentData.findIndex(item => item.id === id);
         if (itemIndex > -1) {
           currentData[itemIndex].trangThai = e.target.value;
+          
+          // Update classes dynamically without re-rendering the whole table
+          if (e.target.value === 'Pending') {
+            e.target.classList.add('status-pending');
+            e.target.classList.remove('status-done');
+          } else {
+            e.target.classList.add('status-done');
+            e.target.classList.remove('status-pending');
+          }
+          
           saveData();
         }
       });

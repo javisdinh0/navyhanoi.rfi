@@ -314,6 +314,19 @@ select.status-select {
   cursor: pointer;
   width: 100%;
 }
+
+select.status-select.status-pending {
+  background-color: #b91c1c !important; /* Dark red for good contrast when printed B&W */
+  color: white !important;
+  border-color: #991b1b !important;
+}
+
+select.status-select.status-done {
+  background-color: white !important;
+  color: #166534 !important; /* Dark green for good contrast when printed B&W */
+  border: 2px solid #166534 !important;
+}
+
 select.status-select option {
   background: white;
   color: black;
