@@ -10,6 +10,8 @@
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <!-- html2pdf for PDF export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- JSZip for image export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -46,6 +48,7 @@
         <p>Double-click on cells to edit. Click "Add Row" to append a new question.</p>
         <div class="action-buttons">
           <button id="add-row-btn" class="btn btn-small floating-btn">Add Row</button>
+          <button id="download-zip-btn" class="btn btn-small floating-btn" style="background: linear-gradient(to right, #3b82f6, #2563eb);">Tải Ảnh (ZIP)</button>
           <button id="download-pdf-btn" class="btn btn-small floating-btn" style="background: linear-gradient(to right, #ef4444, #dc2626);">Download PDF</button>
         </div>
       </div>

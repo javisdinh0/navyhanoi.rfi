@@ -375,6 +375,67 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ZIP Export for Images
+  const downloadZipBtn = document.getElementById('download-zip-btn');
+  if (downloadZipBtn) {
+    downloadZipBtn.addEventListener('click', () => {
+      if (typeof JSZip === 'undefined') {
+        alert("Thư viện nén file chưa được tải. Vui lòng thử lại sau.");
+        return;
+      }
+      
+      const zip = new JSZip();
+      let imageCount = 0;
+
+      currentData.forEach((item) => {
+        const stt = item.stt ? item.stt.trim() : item.id;
+        
+        if (item.yeuCauHinhAnh && item.yeuCauHinhAnh.length > 0) {
+          item.yeuCauHinhAnh.forEach((img, index) => {
+            if (img.src && img.src.startsWith('data:image')) {
+              const base64Data = img.src.split(',')[1];
+              zip.file(`${stt}_YC_${index + 1}.jpg`, base64Data, {base64: true});
+              imageCount++;
+            }
+          });
+        }
+
+        if (item.traLoiHinhAnh && item.traLoiHinhAnh.length > 0) {
+          item.traLoiHinhAnh.forEach((img, index) => {
+            if (img.src && img.src.startsWith('data:image')) {
+              const base64Data = img.src.split(',')[1];
+              zip.file(`${stt}_TL_${index + 1}.jpg`, base64Data, {base64: true});
+              imageCount++;
+            }
+          });
+        }
+      });
+
+      if (imageCount === 0) {
+        alert("Không tìm thấy hình ảnh nào trong bảng để tải về.");
+        return;
+      }
+
+      downloadZipBtn.textContent = "Đang nén...";
+      downloadZipBtn.disabled = true;
+
+      zip.generateAsync({type:"blob"}).then((content) => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(content);
+        link.download = "RFI_Images.zip";
+        link.click();
+        
+        downloadZipBtn.textContent = "Tải Ảnh (ZIP)";
+        downloadZipBtn.disabled = false;
+      }).catch(err => {
+        console.error("Lỗi khi nén file:", err);
+        alert("Có lỗi xảy ra khi nén file ảnh.");
+        downloadZipBtn.textContent = "Tải Ảnh (ZIP)";
+        downloadZipBtn.disabled = false;
+      });
+    });
+  }
+
   // Logout handler
   logoutBtn.addEventListener('click', () => {
     localStorage.removeItem('rfi_user_email');
