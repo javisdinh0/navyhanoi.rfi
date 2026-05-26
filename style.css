@@ -430,6 +430,53 @@ select.status-select option {
   transform: scale(1.2);
 }
 
+/* Print Styles for PDF Export */
+@media print {
+  body {
+    background: white;
+    margin: 0;
+    padding: 0;
+  }
+  #auth-section, .qa-header, .action-buttons {
+    display: none !important;
+  }
+  .app-container {
+    padding: 0;
+    margin: 0;
+    max-width: 100%;
+  }
+  .excel-table-wrapper {
+    box-shadow: none;
+    border: none;
+    overflow: visible !important;
+    position: static;
+  }
+  table {
+    width: 100%;
+    page-break-inside: auto;
+  }
+  th {
+    position: static !important; /* Fix sticky header repeating over text bug */
+  }
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+  td {
+    page-break-inside: avoid;
+  }
+  .delete-img-btn {
+    display: none !important;
+  }
+  /* Improve select display in print */
+  select.status-select {
+    appearance: none;
+    border: none !important;
+    background: transparent !important;
+    text-align: center;
+  }
+}
+
 .thumbnail-wrapper:hover img {
   transform: scale(1.1);
 }

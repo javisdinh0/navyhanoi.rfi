@@ -367,28 +367,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // PDF Export
+  // PDF Export using native print (more reliable, vector text, proper page breaks)
   const downloadPdfBtn = document.getElementById('download-pdf-btn');
   if (downloadPdfBtn) {
     downloadPdfBtn.addEventListener('click', () => {
-      const element = document.getElementById('qa-table');
-      const opt = {
-        margin:       0.2,
-        filename:     'RFI_Hanoi_Table.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
-      };
-      
-      // Temporarily expand height to ensure all content is captured
-      element.style.maxHeight = 'none';
-      element.style.overflow = 'visible';
-      
-      html2pdf().set(opt).from(element).save().then(() => {
-        // Restore styles after generation
-        element.style.maxHeight = '';
-        element.style.overflow = '';
-      });
+      window.print();
     });
   }
 
