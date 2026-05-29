@@ -221,36 +221,62 @@ main.table-container {
 }
 
 .excel-table-wrapper {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   overflow-x: auto;
-  flex: 1;
+  overflow-y: auto;
+  max-height: calc(100vh - 250px);
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+.table-title {
+  background: white;
   color: black;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  padding: 12px;
+  border: 1px solid var(--surface-border);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  text-transform: uppercase;
 }
 
 table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: white;
   color: black;
-  text-align: left;
 }
 
 th, td {
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--surface-border);
+  padding: 8px 12px;
+  text-align: left;
   vertical-align: top;
 }
 
 th {
   font-weight: bold;
   color: black;
+}
+
+/* Make headers sticky */
+thead th {
   position: sticky;
-  top: 0;
-  z-index: 5;
-  text-align: center;
+  z-index: 10;
+  background-clip: padding-box; /* Prevent border bug on sticky */
   border: 1px solid #9ca3af;
   background-color: #f3f4f6;
+}
+thead tr:nth-child(1) th {
+  top: 0;
+  height: 40px; /* Fixed height for first row */
+}
+thead tr:nth-child(2) th {
+  top: 40px; /* Must equal height of first row */
 }
 
 .bg-blue {
@@ -453,6 +479,9 @@ select.status-select option {
     padding: 0;
     margin: 0;
     max-width: 100%;
+  }
+  .table-title {
+    border: none;
   }
   .excel-table-wrapper {
     box-shadow: none;
