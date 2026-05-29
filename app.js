@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+import { userPermissions } from "./permissions.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB885dxTZZUiu9lnQ9PsKnCTljfgMRFqoo",
@@ -104,6 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
 
   let currentData = [];
+  let currentUserLevel = 3;
 
   const loadData = () => {
     // Listen to Firebase Realtime Database
@@ -140,9 +142,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const checkAuth = () => {
     const userEmail = localStorage.getItem('rfi_user_email');
     if (userEmail) {
+      currentUserLevel = userPermissions[userEmail] || 3;
       authSection.style.display = 'none';
       appSection.style.display = 'flex';
-      userEmailDisplay.textContent = userEmail;
+      userEmailDisplay.textContent = userEmail + ` (Level ${currentUserLevel})`;
       loadData();
     } else {
       authSection.style.display = 'flex';
@@ -154,7 +157,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const renderTable = () => {
     tableBody.innerHTML = '';
     
+    if (currentUserLevel > 1) {
+      addRowBtn.style.display = 'none';
+    } else {
+      addRowBtn.style.display = 'inline-block';
+    }
+    
     currentData.forEach((item, index) => {
+      const isEditable = (field) => {
+        if (currentUserLevel === 1) return true;
+        if (currentUserLevel === 2) {
+          return ['traLoiNoiDung', 'traLoiHinhAnh', 'ghiChu', 'trangThai', 'traLoiNote'].includes(field);
+        }
+        return false;
+      };
+
+      const getEditableAttr = (field) => isEditable(field) ? 'contenteditable="true"' : '';
+      const getEditableClass = (field, baseClass = '') => isEditable(field) ? `editable-cell ${baseClass}` : `locked-cell ${baseClass}`;
+      const getImageClass = (field) => isEditable(field) ? 'image-cell' : 'locked-image-cell';
+      const getTabIndex = (field) => isEditable(field) ? 'tabindex="0"' : '';
+
       // Render Images helper
       const renderImages = (imagesArray, field) => {
         if (!imagesArray || imagesArray.length === 0) return '';
@@ -163,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
           html += `
             <div class="thumbnail-wrapper" onclick="openImage('${img.src}')" title="Click to view full size">
               <img src="${img.src}" alt="Image" loading="lazy" />
-              <button class="delete-img-btn" onclick="event.stopPropagation(); deleteImage(${item.id}, '${field}', ${idx})" title="Xóa ảnh này">X</button>
+              ${isEditable(field) ? `<button class="delete-img-btn" onclick="event.stopPropagation(); deleteImage(${item.id}, '${field}', ${idx})" title="Xóa ảnh này">X</button>` : ''}
             </div>
           `;
         });
@@ -184,13 +206,13 @@ document.addEventListener('DOMContentLoaded', () => {
       // Create Row 1
       const tr1 = document.createElement('tr');
       tr1.innerHTML = `
-        <td class="editable-cell" ${getTitle('stt')} style="text-align:center; font-weight:bold;" data-field="stt" data-id="${item.id}" contenteditable="true">${cleanNote(item.stt)}</td>
-        <td class="editable-cell" ${getTitle('banVe')} style="text-align:center; font-weight:bold;" data-field="banVe" data-id="${item.id}" contenteditable="true">${cleanNote(item.banVe).replace(/\n/g, '<br>')}</td>
-        <td class="editable-cell" ${getTitle('yeuCauNoiDung')} data-field="yeuCauNoiDung" data-id="${item.id}" contenteditable="true">${cleanNote(item.yeuCauNoiDung)}</td>
-        <td class="image-cell" data-field="yeuCauHinhAnh" data-id="${item.id}" tabindex="0">${renderImages(item.yeuCauHinhAnh, 'yeuCauHinhAnh')}</td>
-        <td class="editable-cell" ${getTitle('traLoiNoiDung')} data-field="traLoiNoiDung" data-id="${item.id}" contenteditable="true">${cleanNote(item.traLoiNoiDung)}</td>
-        <td class="image-cell" data-field="traLoiHinhAnh" data-id="${item.id}" tabindex="0">${renderImages(item.traLoiHinhAnh, 'traLoiHinhAnh')}</td>
-        <td class="editable-cell" ${getTitle('ghiChu')} data-field="ghiChu" data-id="${item.id}" contenteditable="true">${cleanNote(item.ghiChu)}</td>
+        <td class="${getEditableClass('stt')}" ${getTitle('stt')} style="text-align:center; font-weight:bold;" data-field="stt" data-id="${item.id}" ${getEditableAttr('stt')}>${cleanNote(item.stt)}</td>
+        <td class="${getEditableClass('banVe')}" ${getTitle('banVe')} style="text-align:center; font-weight:bold;" data-field="banVe" data-id="${item.id}" ${getEditableAttr('banVe')}>${cleanNote(item.banVe).replace(/\n/g, '<br>')}</td>
+        <td class="${getEditableClass('yeuCauNoiDung')}" ${getTitle('yeuCauNoiDung')} data-field="yeuCauNoiDung" data-id="${item.id}" ${getEditableAttr('yeuCauNoiDung')}>${cleanNote(item.yeuCauNoiDung)}</td>
+        <td class="${getImageClass('yeuCauHinhAnh')}" data-field="yeuCauHinhAnh" data-id="${item.id}" ${getTabIndex('yeuCauHinhAnh')}>${renderImages(item.yeuCauHinhAnh, 'yeuCauHinhAnh')}</td>
+        <td class="${getEditableClass('traLoiNoiDung')}" ${getTitle('traLoiNoiDung')} data-field="traLoiNoiDung" data-id="${item.id}" ${getEditableAttr('traLoiNoiDung')}>${cleanNote(item.traLoiNoiDung)}</td>
+        <td class="${getImageClass('traLoiHinhAnh')}" data-field="traLoiHinhAnh" data-id="${item.id}" ${getTabIndex('traLoiHinhAnh')}>${renderImages(item.traLoiHinhAnh, 'traLoiHinhAnh')}</td>
+        <td class="${getEditableClass('ghiChu')}" ${getTitle('ghiChu')} data-field="ghiChu" data-id="${item.id}" ${getEditableAttr('ghiChu')}>${cleanNote(item.ghiChu)}</td>
       `;
       tableBody.appendChild(tr1);
 
@@ -200,15 +222,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const statusClass = item.trangThai === 'Pending' ? 'status-pending' : 'status-done';
       tr2.innerHTML = `
         <td style="text-align:center; padding: 4px;">
-          <select class="status-select ${statusClass}" data-id="${item.id}">
+          <select class="status-select ${statusClass}" data-id="${item.id}" ${isEditable('trangThai') ? '' : 'disabled'}>
             <option value="Pending" ${item.trangThai === 'Pending' ? 'selected' : ''}>Pending</option>
             <option value="Done" ${item.trangThai === 'Done' ? 'selected' : ''}>Done</option>
           </select>
         </td>
-        <td class="editable-cell" ${getTitle('ngayGhiNhan')} style="text-align:center; font-weight:bold;" data-field="ngayGhiNhan" data-id="${item.id}" contenteditable="true">${cleanNote(item.ngayGhiNhan)}</td>
-        <td class="editable-cell bg-orange-light" ${getTitle('yeuCauNote')} data-field="yeuCauNote" data-id="${item.id}" contenteditable="true">${cleanNote(item.yeuCauNote)}</td>
+        <td class="${getEditableClass('ngayGhiNhan')}" ${getTitle('ngayGhiNhan')} style="text-align:center; font-weight:bold;" data-field="ngayGhiNhan" data-id="${item.id}" ${getEditableAttr('ngayGhiNhan')}>${cleanNote(item.ngayGhiNhan)}</td>
+        <td class="${getEditableClass('yeuCauNote', 'bg-orange-light')}" ${getTitle('yeuCauNote')} data-field="yeuCauNote" data-id="${item.id}" ${getEditableAttr('yeuCauNote')}>${cleanNote(item.yeuCauNote)}</td>
         <td></td>
-        <td class="editable-cell bg-orange-light" ${getTitle('traLoiNote')} data-field="traLoiNote" data-id="${item.id}" contenteditable="true">${cleanNote(item.traLoiNote)}</td>
+        <td class="${getEditableClass('traLoiNote', 'bg-orange-light')}" ${getTitle('traLoiNote')} data-field="traLoiNote" data-id="${item.id}" ${getEditableAttr('traLoiNote')}>${cleanNote(item.traLoiNote)}</td>
         <td></td>
         <td></td>
       `;

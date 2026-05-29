@@ -290,21 +290,30 @@ tbody tr:hover {
   background-color: #f1f5f9;
 }
 
+/* Editable cells */
 .editable-cell {
-  position: relative;
   cursor: text;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
   min-height: 24px;
+  position: relative;
 }
-
-.editable-cell:hover {
+.editable-cell:hover, .image-cell:hover {
   background-color: rgba(0, 0, 0, 0.03);
 }
-
 .editable-cell[contenteditable="true"]:focus, .image-cell:focus {
   outline: 2px solid var(--accent);
   background-color: #fffbeb;
   color: black;
+}
+
+/* Locked cells */
+.locked-cell, .locked-image-cell {
+  cursor: not-allowed;
+  min-height: 24px;
+}
+select.status-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Tooltip for editor note (hover) */
