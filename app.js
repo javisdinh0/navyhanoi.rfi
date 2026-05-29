@@ -167,7 +167,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const isEditable = (field) => {
         if (currentUserLevel === 1) return true;
         if (currentUserLevel === 2) {
-          return ['traLoiNoiDung', 'traLoiHinhAnh', 'ghiChu', 'trangThai', 'traLoiNote'].includes(field);
+          const level2Fields = ['traLoiNoiDung', 'traLoiHinhAnh', 'ghiChu', 'trangThai', 'traLoiNote'];
+          if (level2Fields.includes(field)) {
+            // Check 24h lock rule
+            if (item.firstEditTime) {
+              const hoursPassed = (Date.now() - item.firstEditTime) / (1000 * 60 * 60);
+              if (hoursPassed >= 24) return false;
+            }
+            return true;
+          }
         }
         return false;
       };
@@ -194,7 +202,19 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       const getTitle = (field) => {
-        return item.editors && item.editors[field] ? `title="(Sửa bởi: ${item.editors[field]})"` : '';
+        if (item.editors && item.editors[field]) {
+          const ed = item.editors[field];
+          if (typeof ed === 'string') {
+            return `title="(Sửa bởi: ${ed})"`;
+          } else if (ed.email && ed.timestamp) {
+            const timeStr = new Date(ed.timestamp).toLocaleString('vi-VN', { 
+              hour: '2-digit', minute: '2-digit', 
+              day: '2-digit', month: '2-digit', year: 'numeric' 
+            });
+            return `title="(Sửa bởi: ${ed.email} lúc ${timeStr})"`;
+          }
+        }
+        return '';
       };
 
       // Clean old editor notes from html if any exist (migration from previous version)
@@ -254,6 +274,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (itemIndex > -1) {
           currentData[itemIndex].trangThai = e.target.value;
           
+          // Track 24h lock and detailed editor info
+          const userEmail = localStorage.getItem('rfi_user_email');
+          if (userEmail) {
+            if (!currentData[itemIndex].editors) currentData[itemIndex].editors = {};
+            currentData[itemIndex].editors['trangThai'] = { email: userEmail, timestamp: Date.now() };
+            
+            if (currentUserLevel === 2 && !currentData[itemIndex].firstEditTime) {
+              currentData[itemIndex].firstEditTime = Date.now();
+            }
+          }
+          
           // Update classes dynamically without re-rendering the whole table
           if (e.target.value === 'Pending') {
             e.target.classList.add('status-pending');
@@ -295,7 +326,13 @@ document.addEventListener('DOMContentLoaded', () => {
           if (!currentData[itemIndex].editors) {
             currentData[itemIndex].editors = {};
           }
-          currentData[itemIndex].editors[field] = userEmail;
+          currentData[itemIndex].editors[field] = { email: userEmail, timestamp: Date.now() };
+          
+          if (currentUserLevel === 2 && ['traLoiNoiDung', 'traLoiHinhAnh', 'ghiChu', 'trangThai', 'traLoiNote'].includes(field)) {
+            if (!currentData[itemIndex].firstEditTime) {
+              currentData[itemIndex].firstEditTime = Date.now();
+            }
+          }
         }
         saveData();
         renderTable(); // Re-render to update tooltips
@@ -325,6 +362,20 @@ document.addEventListener('DOMContentLoaded', () => {
               src: event.target.result,
               alt: "Pasted Image"
             });
+            
+            // Track 24h lock and detailed editor info
+            const userEmail = localStorage.getItem('rfi_user_email');
+            if (userEmail) {
+              if (!currentData[itemIndex].editors) currentData[itemIndex].editors = {};
+              currentData[itemIndex].editors[field] = { email: userEmail, timestamp: Date.now() };
+              
+              if (currentUserLevel === 2 && ['traLoiNoiDung', 'traLoiHinhAnh', 'ghiChu', 'trangThai', 'traLoiNote'].includes(field)) {
+                if (!currentData[itemIndex].firstEditTime) {
+                  currentData[itemIndex].firstEditTime = Date.now();
+                }
+              }
+            }
+
             saveData();
             renderTable();
           }
@@ -340,6 +391,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const itemIndex = currentData.findIndex(item => item.id === id);
       if (itemIndex > -1 && currentData[itemIndex][field]) {
         currentData[itemIndex][field].splice(idx, 1);
+        
+        // Track 24h lock and detailed editor info
+        const userEmail = localStorage.getItem('rfi_user_email');
+        if (userEmail) {
+          if (!currentData[itemIndex].editors) currentData[itemIndex].editors = {};
+          currentData[itemIndex].editors[field] = { email: userEmail, timestamp: Date.now() };
+          
+          if (currentUserLevel === 2 && ['traLoiNoiDung', 'traLoiHinhAnh', 'ghiChu', 'trangThai', 'traLoiNote'].includes(field)) {
+            if (!currentData[itemIndex].firstEditTime) {
+              currentData[itemIndex].firstEditTime = Date.now();
+            }
+          }
+        }
+        
         saveData();
         renderTable();
       }
